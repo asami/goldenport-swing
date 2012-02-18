@@ -8,13 +8,15 @@ import org.goldenport.record._
 import scala.swing.event.KeyPressed
 import scala.swing.event.Key
 import java.util.concurrent.CopyOnWriteArrayList
+import java.io.IOException
+import scala.swing.event.ButtonClicked
 
 /**
  * @since   Feb. 16, 2012
- * @version Feb. 16, 2012
+ * @version Feb. 18, 2012
  * @author  ASAMI, Tomoharu
  */
-class PropertySheetPanel(val contract: RecordSchema) extends GridBagPanel() {
+class PropertySheetPanel(val contract: RecordSchema)(implicit context: SwingContext) extends GridBagPanel() {
   private val _input_fields = new ArrayMap[String, Component]
   private val _message_fields = new ArrayMap[String, Label]
   private val _handlers = new CopyOnWriteArrayList[() => Unit]
@@ -47,6 +49,15 @@ class PropertySheetPanel(val contract: RecordSchema) extends GridBagPanel() {
   }
   
   private def _create_input_field(rf: RecordField) = {
+    rf.datatype match {
+      case XString => _create_input_field_text(rf)
+      case XBase64Binary => _create_input_field_file(rf)
+      case XHexBinary => _create_input_field_file(rf)
+      case _ => _create_input_field_text(rf)
+    }
+  }
+
+  private def _create_input_field_text(rf: RecordField) = {
     val tf = new TextField() {
       listenTo(keys)
       reactions += {
@@ -57,6 +68,10 @@ class PropertySheetPanel(val contract: RecordSchema) extends GridBagPanel() {
     tf
   }
 
+  private def _create_input_field_file(rf: RecordField) = {
+    new FilePropertyField()(context)
+  }
+
   private def _create_message_field(rf: RecordField) = {
     val mf = new Label("message")
     _message_fields += rf.name -> mf
@@ -65,15 +80,12 @@ class PropertySheetPanel(val contract: RecordSchema) extends GridBagPanel() {
   }
 
   private def _validate(rf: RecordField, text: String) = {
-    if (_is_valid(rf, text)) {
-      _message_clear(rf.name)
-    } else {
-      _message_warning(rf.name, "XXX")
+    rf.validate(text, context.recordContext) match {
+      case Success(s) => _message_clear(rf.name)
+      case Failure(e) => {
+        _message_warning(rf.name, "XXX")
+      } 
     }
-  }
-
-  private def _is_valid(rf: RecordField, text: String) = {
-    false
   }
 
   private def _message_clear(name: String) {
