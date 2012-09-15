@@ -2,7 +2,7 @@ organization := "org.goldenport"
 
 name := "goldenport-swing"
 
-version := "0.2.0-SNAPSHOT"
+version := "0.2.0"
 
 // scalaVersion := "2.9.1"
 
@@ -20,7 +20,7 @@ libraryDependencies += "org.scalaz" %% "scalaz-core" % "6.0.4"
 
 libraryDependencies += "org.goldenport" %% "goldenport-scala-lib" % "0.1.2"
 
-libraryDependencies += "org.goldenport" %% "goldenport-record" % "0.2.0-SNAPSHOT"
+libraryDependencies += "org.goldenport" %% "goldenport-record" % "0.2.0"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "1.6.1" % "test"
 
